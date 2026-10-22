@@ -1,0 +1,26 @@
+{
+  "dependencies": {
+    "ethers": "^6.13.0",
+    "express": "^4.19.2"
+  },
+  "description": "Index contract events with ethers.js: poll or subscribe, decode logs, store them, and serve them over a small REST API",
+  "engines": {
+    "node": ">=20"
+  },
+  "keywords": [
+    "ethereum",
+    "ethers",
+    "events",
+    "indexer",
+    "web3"
+  ],
+  "license": "MIT",
+  "main": "src/index.js",
+  "name": "ethers-event-listener",
+  "scripts": {
+    "start": "node src/index.js",
+    "test": "node --test test/*.test.js"
+  },
+  "type": "commonjs",
+  "version": "0.1.0"
+}
