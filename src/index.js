@@ -10,6 +10,9 @@
  *   FROM_BLOCK        first block to backfill (default: latest block)
  *   POLL_INTERVAL_MS  polling cadence when not subscribed (default 5000)
  *   PORT              API port (default 3000)
+ *   DATABASE_PATH     SQLite file for persistent storage; when unset the
+ *                     store is in-memory and a restart re-backfills
+ *                     (see src/sqlite-store.js)
  *
  * Flow: backfill [FROM_BLOCK, latest] once, then keep up either by live
  * subscription (WebSocket provider) or by polling passes that advance a
@@ -19,6 +22,7 @@
 const fs = require('node:fs');
 const { JsonRpcProvider, WebSocketProvider } = require('ethers');
 const { EventStore } = require('./store');
+const { SqliteEventStore } = require('./sqlite-store');
 const { EventListener } = require('./listener');
 const { createApp } = require('./server');
 
@@ -34,6 +38,7 @@ function loadConfig(env = process.env) {
     fromBlock: env.FROM_BLOCK ? Number(env.FROM_BLOCK) : null,
     pollIntervalMs: env.POLL_INTERVAL_MS ? Number(env.POLL_INTERVAL_MS) : 5000,
     port: env.PORT ? Number(env.PORT) : 3000,
+    databasePath: env.DATABASE_PATH || null,
   };
 }
 
@@ -44,7 +49,9 @@ function createProvider(rpcUrl) {
 async function main() {
   const config = loadConfig();
   const provider = createProvider(config.rpcUrl);
-  const store = new EventStore();
+  const store = config.databasePath
+    ? new SqliteEventStore({ path: config.databasePath })
+    : new EventStore();
   const listener = new EventListener({
     provider,
     address: config.address,
@@ -82,7 +89,10 @@ async function main() {
   const shutdown = () => {
     clearInterval(timer);
     listener.stop();
-    server.close(() => process.exit(0));
+    server.close(() => {
+      if (typeof store.close === 'function') store.close();
+      process.exit(0);
+    });
   };
   process.on('SIGINT', shutdown);
   process.on('SIGTERM', shutdown);
