@@ -10,7 +10,8 @@
  *
  * The store is deliberately behind a small class: swapping this for a
  * SQLite/Postgres implementation only requires the same methods
- * (add, getById, query, stats, clear).
+ * (add, getById, query, stats, clear). The SQLite version of that swap
+ * is src/sqlite-store.js, selected with DATABASE_PATH (see README).
  */
 class EventStore {
   constructor() {
