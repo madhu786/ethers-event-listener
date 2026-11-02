@@ -5,7 +5,7 @@
   },
   "description": "Index contract events with ethers.js: poll or subscribe, decode logs, store them, and serve them over a small REST API",
   "engines": {
-    "node": ">=20"
+    "node": ">=24"
   },
   "keywords": [
     "ethereum",
